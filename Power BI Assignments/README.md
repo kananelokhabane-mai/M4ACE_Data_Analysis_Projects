@@ -1,18 +1,11 @@
-# Data Professional Survey - Power BI Dashboard
+# Data Analysis Portfolio
 
-## Project Overview
-This project analyzes a global survey of data professionals to uncover trends in salary, job satisfaction, and entry-level difficulty.
+## 1. Data Professional Survey Report (Power BI)
+This dashboard analyzes global trends among data professionals, including salary distributions and workplace happiness.
 
-## Key Insights
-* **Demographics:** Visualized respondent distribution across 6+ countries.
-* **Sentiment:** Created a "Happiness Score" gauge to measure work-life balance vs. salary satisfaction.
-* **Salary Modeling:** Identified top-paying roles within the data ecosystem.
+![Survey Dashboard](Survey Dashboard.png)
 
-## Dashboard Preview
-![Data Professional Dashboard](Survey Dashboard.png)
+## 2. Pizza Sales Performance Dashboard (Excel)
+A comprehensive look at operational data, visualizing hourly sales trends and product category performance.
 
----
-
-## Technical Skills Used
-* **Power BI:** DAX, Data Modeling, Gauge Charts, Treemaps.
-* **Data Cleaning:** Power Query for handling missing survey responses.
+![Sales Dashboard](Sales Dashboard.png)

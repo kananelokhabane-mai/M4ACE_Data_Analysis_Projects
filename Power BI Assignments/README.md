@@ -11,4 +11,4 @@ Developed as part of the Week 9 assignment, this dashboard tracks revenue, profi
 
 ## 3. Pizza Sales Performance Dashboard (Excel)
 A comprehensive look at operational data, visualizing hourly sales trends and product category performance to optimize business efficiency.
-![Pizza Sales Dashboard](Pizza%20Sales%20Performance%20Dashboard.png)
+![Pizza Sales Dashboard](Pizza%20sales%20Dashboard.png)

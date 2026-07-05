@@ -113,15 +113,16 @@ GROUP BY [department]
 ORDER BY [department] desc;
 
 -- calculating the race distribution in the company
-Select
+Select [department],
     ISNULL([race], 'Not Specified') AS race_demographic,
     COUNT(*) AS total_count,
     ROUND(
-        (COUNT(*) * 100.0) / (SELECT COUNT(*) FROM [dbo].[HR Data]), 
+        (COUNT(*) * 100.0) / (SELECT COUNT(*) 
+ FROM [dbo].[HR Data]), 
         2
     ) AS company_percentage
 FROM [dbo].[HR Data]
-GROUP BY [race]
+GROUP BY [department],[race]
 ORDER BY total_count DESC
 -- race by department
 SELECT 
@@ -133,3 +134,101 @@ FROM [dbo].[HR Data]
 GROUP BY [department], [race]
 ORDER BY [department] ASC, total_count DESC;
 
+-- Analysing department
+SELECT [department],
+  COUNT(*) AS lifetime_hires,
+    SUM(CASE 
+            WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' THEN 1
+            WHEN TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1
+            ELSE 0 
+        END) AS active_headcount,
+    ROUND(
+        (SUM(CASE 
+                WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' THEN 1
+                WHEN TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1
+                ELSE 0 
+             END) * 100.0) / 
+        (SELECT COUNT(*) FROM [dbo].[HR Data] 
+         WHERE term_date IS NULL OR term_date = '' OR term_date = 'NULL' 
+            OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE()), 
+        2
+    ) AS active_workforce_share_percentage
+
+FROM [dbo].[HR Data]
+GROUP BY [department]
+ORDER BY active_headcount DESC;
+
+
+-- analysing job positions in the company
+SELECT [jobtitle],
+    SUM(CASE 
+            WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' THEN 1
+            WHEN TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1
+            ELSE 0 
+        END) AS active_headcount
+FROM [dbo].[HR Data]
+GROUP BY [jobtitle]
+ORDER BY active_headcount DESC;
+
+SELECT 
+    CASE 
+        WHEN [jobtitle] LIKE '%Chief%' OR [jobtitle] LIKE '%VP%' OR [jobtitle] LIKE '%Vice President%' OR [jobtitle] LIKE '%Director%' THEN 'Executive Leadership'
+        WHEN [jobtitle] LIKE '%Manager%' OR [jobtitle] LIKE '%Supervisor%' OR [jobtitle] LIKE '%Lead%' THEN 'Middle Management'
+        ELSE 'Individual Contributors / Staff'
+    END AS organizational_tier, 
+    SUM(CASE 
+            WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' THEN 1
+            WHEN TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1
+            ELSE 0 
+        END) AS active_headcount,     
+    ROUND(
+        (SUM(CASE 
+                WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' THEN 1
+                WHEN TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1
+                ELSE 0 
+             END) * 100.0) / 
+        (SELECT COUNT(*) FROM [dbo].[HR Data] 
+         WHERE term_date IS NULL OR term_date = '' OR term_date = 'NULL' 
+            OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE()), 
+        2
+    ) AS tier_percentage
+FROM [dbo].[HR Data]
+GROUP BY 
+    CASE 
+        WHEN [jobtitle] LIKE '%Chief%' OR [jobtitle] LIKE '%VP%' OR [jobtitle] LIKE '%Vice President%' OR [jobtitle] LIKE '%Director%' THEN 'Executive Leadership'
+        WHEN [jobtitle] LIKE '%Manager%' OR [jobtitle] LIKE '%Supervisor%' OR [jobtitle] LIKE '%Lead%' THEN 'Middle Management'
+        ELSE 'Individual Contributors / Staff'
+    END
+ORDER BY active_headcount;
+
+
+-- analysing location
+SELECT [department],
+    SUM(CASE 
+            WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' THEN 1
+            WHEN TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1
+            ELSE 0 
+        END) AS active_headcount,
+    SUM(CASE 
+            WHEN (term_date IS NULL OR term_date = '' OR term_date = 'NULL' OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE())
+                 AND [location] LIKE '%Headquarter%' THEN 1 
+            ELSE 0 
+        END) AS hq_count,
+    ROUND(
+        (SUM(CASE WHEN (term_date IS NULL OR term_date = '' OR term_date = 'NULL' OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE()) AND [location] LIKE '%Headquarter%' THEN 1.0 ELSE 0.0 END) * 100.0) / 
+        NULLIF(SUM(CASE WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1 ELSE 0 END), 0),
+        2
+    ) AS hq_percentage,
+    SUM(CASE 
+            WHEN (term_date IS NULL OR term_date = '' OR term_date = 'NULL' OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE())
+                 AND [location] LIKE '%Remote%' THEN 1 
+            ELSE 0 
+        END) AS remote_count,
+    ROUND(
+        (SUM(CASE WHEN (term_date IS NULL OR term_date = '' OR term_date = 'NULL' OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE()) AND [location] LIKE '%Remote%' THEN 1.0 ELSE 0.0 END) * 100.0) / 
+        NULLIF(SUM(CASE WHEN term_date IS NULL OR term_date = '' OR term_date = 'NULL' OR TRY_CONVERT(DATE, LEFT(term_date, 10)) > GETDATE() THEN 1 ELSE 0 END), 0),
+        2
+    ) AS remote_percentage
+FROM [dbo].[HR Data]
+GROUP BY [department]
+ORDER BY remote_percentage DESC
